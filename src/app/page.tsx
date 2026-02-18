@@ -37,9 +37,8 @@ import Image from 'next/image'
 
 const HOTMART_CHECKOUT_URL = 'https://pay.hotmart.com/C104125906I'
 
-// Countdown Timer Component
+// Countdown Timer Component - Simplified for better LCP
 function CountdownTimer({ className = '' }: { className?: string }) {
-  const [mounted, setMounted] = useState(false)
   const [timeLeft, setTimeLeft] = useState({
     hours: 23,
     minutes: 59,
@@ -47,16 +46,14 @@ function CountdownTimer({ className = '' }: { className?: string }) {
   })
 
   useEffect(() => {
-    // Mark as mounted after initial render
-    const mountTimer = setTimeout(() => setMounted(true), 0)
-    
     // Get or set end time (24 hours from first visit)
     const getEndTime = () => {
+      if (typeof window === 'undefined') return Date.now() + 24 * 60 * 60 * 1000
       const stored = localStorage.getItem('countdownEndTime')
       if (stored) {
         return parseInt(stored, 10)
       }
-      const endTime = Date.now() + 24 * 60 * 60 * 1000 // 24 hours
+      const endTime = Date.now() + 24 * 60 * 60 * 1000
       localStorage.setItem('countdownEndTime', endTime.toString())
       return endTime
     }
@@ -78,27 +75,10 @@ function CountdownTimer({ className = '' }: { className?: string }) {
     calculateTimeLeft()
     const timer = setInterval(calculateTimeLeft, 1000)
 
-    return () => {
-      clearTimeout(mountTimer)
-      clearInterval(timer)
-    }
+    return () => clearInterval(timer)
   }, [])
 
   const pad = (num: number) => num.toString().padStart(2, '0')
-
-  // Show placeholder during SSR to avoid hydration mismatch
-  if (!mounted) {
-    return (
-      <div className={`flex items-center justify-center gap-1 ${className}`}>
-        <div className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-3 text-white shadow-lg">
-          <Timer className="h-5 w-5 animate-pulse" />
-          <span className="font-mono text-xl font-bold tracking-wider">
-            23:59:59
-          </span>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className={`flex items-center justify-center gap-1 ${className}`}>
@@ -176,13 +156,14 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Ebook Mockup */}
+            {/* Ebook Mockup - Optimized for LCP */}
             <div className="relative mx-auto w-full max-w-md lg:mx-0">
               <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl bg-gradient-to-br from-green-100 to-blue-50 p-8 shadow-2xl">
                 <Image
                   src="/ebook-cover.webp"
                   alt="Feed Your Brain - ADHD Nutrition Guide"
                   fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
                   className="object-contain"
                   priority
                 />
